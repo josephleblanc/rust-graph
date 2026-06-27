@@ -1,0 +1,102 @@
+[workspace]
+members = [".", "crates/my-graph-core"]
+resolver = "3"
+
+[package]
+name = "my-graph"
+version = "0.1.0"
+edition = "2024"
+default-run = "native-graph"
+
+# Bevy's dev-build guidance: lightly optimize local code and fully optimize
+# dependencies so debug/lab runs are representative without making local
+# incremental rebuilds as expensive as release builds.
+[profile.dev]
+opt-level = 1
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+# [lib]
+# crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["native"]
+bevy-render = [
+    "dep:bevy",
+    "dep:bytemuck",
+    "dep:getrandom03",
+    "bevy/std",
+    "bevy/bevy_asset",
+    "bevy/bevy_camera",
+    "bevy/bevy_color",
+    "bevy/bevy_core_pipeline",
+    "bevy/bevy_image",
+    "bevy/bevy_light",
+    "bevy/bevy_log",
+    "bevy/bevy_mesh",
+    "bevy/bevy_pbr",
+    "bevy/bevy_post_process",
+    "bevy/bevy_render",
+    "bevy/bevy_shader",
+    "bevy/bevy_text",
+    "bevy/bevy_window",
+    "bevy/default_font",
+    "bevy/mesh_picking",
+    "bevy/tonemapping_luts",
+    "bevy/zstd_rust",
+    "bevy/bevy_ui",
+    "bevy/bevy_ui_render",
+]
+native = [
+    "bevy-render",
+    "bevy/async_executor",
+    "bevy/bevy_winit",
+    "bevy/keyboard",
+    "bevy/mouse",
+    "bevy/png",
+    "bevy/multi_threaded",
+    "bevy/x11",
+    "bevy/wayland",
+]
+web = [
+    "bevy-render",
+    "bevy/async_executor",
+    "bevy/bevy_winit",
+    "bevy/keyboard",
+    "bevy/mouse",
+    "bevy/webgl2",
+]
+
+[dependencies]
+my-graph-core = { path = "crates/my-graph-core" }
+serde_json = "1"
+bytemuck = { version = "1", features = ["derive"], optional = true }
+getrandom03 = { package = "getrandom", version = "0.3", features = [
+    "wasm_js",
+], optional = true }
+
+[dependencies.bevy]
+version = "0.19.0"
+default-features = false
+optional = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+cozo = { version = "0.7.6", default-features = false, features = ["wasm"] }
+getrandom = { version = "0.2", features = ["js"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+iai-callgrind = "0.16.1"
+stats_alloc = "0.1.10"
+tracking-allocator = { version = "0.4.0", default-features = false }
+
+[[bin]]
+name = "native-graph"
+path = "src/bin/native_graph.rs"
+required-features = ["native"]
+
+[[bin]]
+name = "web-graph"
+path = "src/bin/web_graph.rs"
+required-features = ["web"]

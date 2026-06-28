@@ -43,6 +43,7 @@ bevy-render = [
     "bevy/bevy_text",
     "bevy/bevy_window",
     "bevy/default_font",
+    "bevy/bevy_feathers",
     "bevy/mesh_picking",
     "bevy/tonemapping_luts",
     "bevy/zstd_rust",

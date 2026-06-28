@@ -35,6 +35,10 @@ impl Graph {
         &self.nodes
     }
 
+    pub fn node_by_id(&self, id: usize) -> Option<&GraphNode> {
+        self.nodes.iter().find(|node| node.id == id)
+    }
+
     pub fn edges(&self) -> &[GraphEdge] {
         &self.edges
     }
@@ -104,8 +108,19 @@ mod tests {
         let graph = Graph::sample();
 
         for edge in graph.edges() {
-            assert!(graph.nodes().iter().any(|node| node.id == edge.source));
-            assert!(graph.nodes().iter().any(|node| node.id == edge.target));
+            assert!(graph.node_by_id(edge.source).is_some());
+            assert!(graph.node_by_id(edge.target).is_some());
         }
+    }
+
+    #[test]
+    fn node_lookup_uses_graph_ids_not_slice_indexes() {
+        let graph = Graph::new(
+            vec![GraphNode::new(42, "Node", [0.0, 0.0, 0.0], 1.0)],
+            vec![],
+        );
+
+        assert_eq!(graph.node_by_id(42).map(|node| node.label), Some("Node"));
+        assert!(graph.node_by_id(0).is_none());
     }
 }
